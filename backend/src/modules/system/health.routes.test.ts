@@ -3,6 +3,8 @@ import { healthResponseSchema } from '@edutrack/contracts';
 import { createApp } from '../../app/create-app.js';
 import { parseEnvironment } from '../../infrastructure/config/environment.js';
 
+const TEST_DATABASE_URL = 'postgresql://test:test@localhost:5432/edutrack_test';
+
 describe('GET /api/v1/health', () => {
   const apps: ReturnType<typeof createApp>[] = [];
 
@@ -11,7 +13,7 @@ describe('GET /api/v1/health', () => {
   });
 
   it('returns the shared success response without starting a listener', async () => {
-    const app = createApp(parseEnvironment({ NODE_ENV: 'test' }));
+    const app = createApp(parseEnvironment({ NODE_ENV: 'test', DATABASE_URL: TEST_DATABASE_URL }));
     apps.push(app);
 
     const response = await app.inject({

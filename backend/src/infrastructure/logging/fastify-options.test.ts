@@ -2,9 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { parseEnvironment } from '../config/environment.js';
 import { createFastifyOptions } from './fastify-options.js';
 
+const TEST_DATABASE_URL = 'postgresql://test:test@localhost:5432/edutrack_test';
+
 describe('createFastifyOptions', () => {
   it('uses readable pretty logging in development', () => {
-    const options = createFastifyOptions(parseEnvironment({ NODE_ENV: 'development' }));
+    const options = createFastifyOptions(
+      parseEnvironment({ NODE_ENV: 'development', DATABASE_URL: TEST_DATABASE_URL }),
+    );
 
     expect(options.logger).toMatchObject({
       level: 'debug',
@@ -17,7 +21,9 @@ describe('createFastifyOptions', () => {
   });
 
   it('uses structured JSON logging outside development', () => {
-    const options = createFastifyOptions(parseEnvironment({ NODE_ENV: 'production' }));
+    const options = createFastifyOptions(
+      parseEnvironment({ NODE_ENV: 'production', DATABASE_URL: TEST_DATABASE_URL }),
+    );
 
     expect(options.logger).toMatchObject({
       level: 'info',
@@ -27,14 +33,18 @@ describe('createFastifyOptions', () => {
   });
 
   it('generates request IDs instead of trusting incoming headers', () => {
-    const options = createFastifyOptions(parseEnvironment({ NODE_ENV: 'test' }));
+    const options = createFastifyOptions(
+      parseEnvironment({ NODE_ENV: 'test', DATABASE_URL: TEST_DATABASE_URL }),
+    );
 
     expect(options.requestIdHeader).toBe(false);
     expect(options.genReqId).toBeTypeOf('function');
   });
 
   it('configures redaction for credentials, request bodies, and exception details', () => {
-    const options = createFastifyOptions(parseEnvironment({ NODE_ENV: 'production' }));
+    const options = createFastifyOptions(
+      parseEnvironment({ NODE_ENV: 'production', DATABASE_URL: TEST_DATABASE_URL }),
+    );
 
     expect(options.logger).toMatchObject({
       redact: {

@@ -5,11 +5,15 @@ import { createApp as createApplication } from '../../app/create-app.js';
 import { AppError } from './app-error.js';
 import { ERROR_CODES } from './error-codes.js';
 
+const TEST_DATABASE_URL = 'postgresql://test:test@localhost:5432/edutrack_test';
+
 describe('centralized error handling', () => {
   const apps: ReturnType<typeof createApplication>[] = [];
 
   function createApp() {
-    const app = createApplication(parseEnvironment({ NODE_ENV: 'test' }));
+    const app = createApplication(
+      parseEnvironment({ NODE_ENV: 'test', DATABASE_URL: TEST_DATABASE_URL }),
+    );
     apps.push(app);
     return app;
   }
