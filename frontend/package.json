@@ -4,5 +4,8 @@
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@edutrack/contracts": "^0.1.0"
   }
 }
