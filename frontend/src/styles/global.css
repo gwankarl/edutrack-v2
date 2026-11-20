@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+@layer base {
+  :root {
+    color-scheme: light;
+    font-family: var(--edutrack-font-sans);
+    color: var(--edutrack-color-text);
+    background-color: var(--edutrack-color-canvas);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  :focus-visible {
+    outline: var(--edutrack-focus-width) solid var(--edutrack-color-focus);
+    outline-offset: var(--edutrack-focus-offset);
+  }
+}

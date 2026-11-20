@@ -92,6 +92,20 @@ Stack:
 - Follow existing naming conventions and folder structure.
 - Create directories and files only when their purpose is needed.
 
+### Feature Module Organization
+- Organize frontend functionality by business feature.
+- Feature modules may contain `pages/`, `components/`, `hooks/`,
+  `api/`, `types/`, and an optional `index.ts`.
+- Create only the folders and files required by the current feature.
+- Keep API requests separate from React components.
+- Keep TanStack Query hooks separate from API request functions.
+- Keep shared API schemas and types in `@edutrack/contracts`.
+- Avoid unnecessary barrel exports and circular dependencies.
+- Do not import another feature's private implementation files;
+  expose shared functionality deliberately when needed.
+- Keep simple page-specific JSX and state inside the page rather
+  than creating unnecessary components.
+
 ## Development Workflow
 
 1. Work on one approved increment at a time (M0–M9).

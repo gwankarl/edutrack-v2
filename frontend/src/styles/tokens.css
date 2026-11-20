@@ -1,0 +1,44 @@
+:root {
+  --edutrack-color-canvas: #f8fafc;
+  --edutrack-color-surface: #ffffff;
+  --edutrack-color-text: #172554;
+  --edutrack-color-muted: #475569;
+  --edutrack-color-brand: #1d4ed8;
+  --edutrack-color-border: #cbd5e1;
+  --edutrack-color-focus: #2563eb;
+
+  --edutrack-font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --edutrack-text-display: clamp(2.25rem, 7vw, 3.5rem);
+  --edutrack-leading-body: 1.5;
+
+  --edutrack-space-page: clamp(1rem, 4vw, 2rem);
+  --edutrack-space-section: 2rem;
+  --edutrack-space-card: 1.5rem;
+
+  --edutrack-radius-card: 1rem;
+  --edutrack-radius-control: 0.5rem;
+
+  --edutrack-focus-width: 3px;
+  --edutrack-focus-offset: 3px;
+}
+
+@theme inline {
+  --color-canvas: var(--edutrack-color-canvas);
+  --color-surface: var(--edutrack-color-surface);
+  --color-text: var(--edutrack-color-text);
+  --color-muted: var(--edutrack-color-muted);
+  --color-brand: var(--edutrack-color-brand);
+  --color-border: var(--edutrack-color-border);
+  --color-focus: var(--edutrack-color-focus);
+
+  --font-sans: var(--edutrack-font-sans);
+  --text-display: var(--edutrack-text-display);
+  --leading-body: var(--edutrack-leading-body);
+
+  --spacing-page: var(--edutrack-space-page);
+  --spacing-section: var(--edutrack-space-section);
+  --spacing-card: var(--edutrack-space-card);
+
+  --radius-card: var(--edutrack-radius-card);
+  --radius-control: var(--edutrack-radius-control);
+}
