@@ -46,6 +46,52 @@ Stack:
 - Enforce authentication, permissions, and resource ownership server-side.
 - Preserve Course versions, historical learning records, and Quiz attempt integrity.
 
+
+### Separation of Concerns
+- Every file must have one clearly defined responsibility.
+- Routes only register endpoints, middleware/hooks, and handlers.
+- Controllers handle HTTP input/output; they contain no business logic.
+- Services implement business rules and orchestration.
+- Repositories handle persistence and database queries.
+- Shared API schemas and types belong in `contracts/`.
+- Backend-only types belong in dedicated type files when needed.
+- Database schemas belong in dedicated backend database files.
+- Do not define schemas, unrelated types, or business logic inside route files.
+- Avoid unnecessary layers for trivial features, but never mix unrelated responsibilities.
+
+### Centralized Error Handling
+- Use one centralized Fastify error handler for API errors.
+- Define reusable application errors and error codes separately.
+- Routes, controllers, services, and repositories should throw errors rather than construct error responses.
+- The central handler maps errors to HTTP statuses and shared API error contracts.
+- Handle validation, authentication, authorization, not-found, and unexpected errors consistently.
+- Log unexpected errors without exposing sensitive details.
+- Do not add repetitive try/catch blocks merely to forward errors to the central handler.
+
+### Frontend Architecture and Separation of Concerns
+- Use a feature-based, modular React architecture.
+- Every component and file must have one clear responsibility.
+- Keep TSX components focused on rendering, props, event handling,
+  and minimal local UI state.
+- Do not place API requests, complex data transformations,
+  business rules, or unrelated utilities inside components.
+- Keep API communication in dedicated API modules.
+- Use TanStack Query hooks for server-state fetching and mutations.
+- Place reusable hooks, utilities, and types in appropriate files.
+- Use shared Zod API contracts from `@edutrack/contracts`.
+- Keep frontend-only types local to their feature when appropriate.
+- Separate feature-specific components from shared UI components.
+- Extract components only when they are reusable, independently
+  meaningful, or significantly improve readability.
+- Do not create components, hooks, or abstraction layers for
+  trivial logic.
+- Keep simple event handlers, presentation conditions, and
+  component-specific UI state inside their components.
+- Avoid oversized TSX files and components with multiple
+  unrelated responsibilities.
+- Follow existing naming conventions and folder structure.
+- Create directories and files only when their purpose is needed.
+
 ## Development Workflow
 
 1. Work on one approved increment at a time (M0–M9).
