@@ -32,21 +32,21 @@ import {
   consumeEmailVerificationToken,
   findActiveEmailVerificationToken,
   issueEmailVerificationToken,
-} from './email-verification-token-service.js';
+} from './email-verification/email-verification-token-service.js';
 import {
   consumePasswordResetToken,
   findActivePasswordResetToken,
   issuePasswordResetToken,
   resetPasswordWithToken,
-} from './password-reset-token-service.js';
-import { createSession } from './session-repository.js';
-import { createPasswordResetWorkflow } from './password-reset-workflow-service.js';
+} from './password-management/password-reset-token-service.js';
+import { createSession } from './sessions/session-repository.js';
+import { createPasswordResetWorkflow } from './password-management/password-reset-workflow-service.js';
 import {
   EmailVerificationIssuanceLimitError,
   PasswordResetIssuanceLimitError,
 } from './account-repository.errors.js';
-import { createEmailVerificationWorkflow } from './email-verification-workflow-service.js';
-import { confirmEmailVerificationToken } from './email-verification-token-service.js';
+import { createEmailVerificationWorkflow } from './email-verification/email-verification-workflow-service.js';
+import { confirmEmailVerificationToken } from './email-verification/email-verification-token-service.js';
 
 const TEST_DATABASE_NAME = 'edutrack_test';
 const createdUserIds: Uuid[] = [];

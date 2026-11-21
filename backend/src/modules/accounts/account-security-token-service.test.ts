@@ -15,13 +15,13 @@ const mocks = vi.hoisted(() => ({
   consumePasswordResetToken: vi.fn(),
 }));
 
-vi.mock('./email-verification-token-repository.js', () => ({
+vi.mock('./email-verification/email-verification-token-repository.js', () => ({
   issueEmailVerificationToken: mocks.issueEmailVerificationToken,
   findActiveEmailVerificationToken: mocks.findActiveEmailVerificationToken,
   consumeEmailVerificationToken: mocks.consumeEmailVerificationToken,
 }));
 
-vi.mock('./password-reset-token-repository.js', () => ({
+vi.mock('./password-management/password-reset-token-repository.js', () => ({
   issuePasswordResetToken: mocks.issuePasswordResetToken,
   findActivePasswordResetToken: mocks.findActivePasswordResetToken,
   consumePasswordResetToken: mocks.consumePasswordResetToken,
@@ -31,12 +31,12 @@ import {
   consumeEmailVerificationToken,
   findActiveEmailVerificationToken,
   issueEmailVerificationToken,
-} from './email-verification-token-service.js';
+} from './email-verification/email-verification-token-service.js';
 import {
   consumePasswordResetToken,
   findActivePasswordResetToken,
   issuePasswordResetToken,
-} from './password-reset-token-service.js';
+} from './password-management/password-reset-token-service.js';
 
 const userId = '550e8400-e29b-41d4-a716-446655440000';
 const record = {
