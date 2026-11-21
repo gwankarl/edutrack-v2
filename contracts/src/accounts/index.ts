@@ -17,3 +17,12 @@ export type {
   RegistrationRequest,
   RegistrationResponse,
 } from './registration.schema.js';
+
+export { accountRoleSchema, accountRoleValues } from './account-role.schema.js';
+export type { AccountRole } from './account-role.schema.js';
+
+export { currentUserSchema, currentUserResponseSchema } from './current-user.schema.js';
+export type { CurrentUser, CurrentUserResponse } from './current-user.schema.js';
+
+export { logoutResponseSchema } from './logout.schema.js';
+export type { LogoutResponse } from './logout.schema.js';

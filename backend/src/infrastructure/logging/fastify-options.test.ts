@@ -22,7 +22,11 @@ describe('createFastifyOptions', () => {
 
   it('uses structured JSON logging outside development', () => {
     const options = createFastifyOptions(
-      parseEnvironment({ NODE_ENV: 'production', DATABASE_URL: TEST_DATABASE_URL }),
+      parseEnvironment({
+        NODE_ENV: 'production',
+        DATABASE_URL: TEST_DATABASE_URL,
+        FRONTEND_ORIGIN: 'https://edutrack.example.test',
+      }),
     );
 
     expect(options.logger).toMatchObject({
@@ -43,7 +47,11 @@ describe('createFastifyOptions', () => {
 
   it('configures redaction for credentials, request bodies, and exception details', () => {
     const options = createFastifyOptions(
-      parseEnvironment({ NODE_ENV: 'production', DATABASE_URL: TEST_DATABASE_URL }),
+      parseEnvironment({
+        NODE_ENV: 'production',
+        DATABASE_URL: TEST_DATABASE_URL,
+        FRONTEND_ORIGIN: 'https://edutrack.example.test',
+      }),
     );
 
     expect(options.logger).toMatchObject({

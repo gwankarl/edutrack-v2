@@ -1,6 +1,6 @@
-import { accountEmailSchema } from '@edutrack/contracts';
+import { accountEmailSchema, accountRoleSchema } from '@edutrack/contracts';
 import { eq, sql } from 'drizzle-orm';
-import type { Uuid } from '@edutrack/contracts';
+import type { AccountRole, Uuid } from '@edutrack/contracts';
 import { getDatabaseClient } from '../../infrastructure/database/client.js';
 import { userRoles } from '../../infrastructure/database/schema/accounts/user-roles.table.js';
 import { users } from '../../infrastructure/database/schema/accounts/users.table.js';
@@ -14,6 +14,12 @@ export type CreateAccountInput = Pick<
 export type PublicAccountRecord = Pick<typeof users.$inferSelect, 'id' | 'displayName' | 'email'>;
 
 export type AuthenticationAccountRecord = typeof users.$inferSelect;
+export type AccountWithRolesRecord = Pick<
+  AuthenticationAccountRecord,
+  'id' | 'displayName' | 'email'
+> & {
+  roles: AccountRole[];
+};
 
 /**
  * Only exposes the operation needed by this repository, so the existing
@@ -99,6 +105,32 @@ export async function findAccountById(id: Uuid): Promise<PublicAccountRecord | u
     .limit(1);
 
   return account;
+}
+
+/** Returns only public account fields and roles loaded from trusted database records. */
+export async function findAccountWithRolesById(
+  id: Uuid,
+): Promise<AccountWithRolesRecord | undefined> {
+  const rows = await getDatabaseClient()
+    .select({
+      id: users.id,
+      displayName: users.displayName,
+      email: users.email,
+      role: userRoles.role,
+    })
+    .from(users)
+    .leftJoin(userRoles, eq(userRoles.userId, users.id))
+    .where(eq(users.id, id));
+
+  const first = rows[0];
+  if (!first) return undefined;
+
+  return {
+    id: first.id,
+    displayName: first.displayName,
+    email: first.email,
+    roles: rows.flatMap((row) => (row.role === null ? [] : [accountRoleSchema.parse(row.role)])),
+  };
 }
 
 export async function findAccountForAuthenticationByEmail(

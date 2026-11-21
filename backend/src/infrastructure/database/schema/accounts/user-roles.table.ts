@@ -1,7 +1,8 @@
 import { index, pgEnum, pgTable, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users.table.js';
+import { accountRoleValues } from '@edutrack/contracts';
 
-export const userRoleEnum = pgEnum('user_role', ['student', 'teacher', 'administrator']);
+export const userRoleEnum = pgEnum('user_role', accountRoleValues);
 
 export const userRoles = pgTable(
   'user_roles',

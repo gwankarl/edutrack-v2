@@ -10,6 +10,7 @@ describe('parseEnvironment', () => {
       HOST: '127.0.0.1',
       PORT: 3000,
       DATABASE_URL: TEST_DATABASE_URL,
+      FRONTEND_ORIGIN: 'http://localhost:5173',
     });
   });
 
@@ -20,12 +21,14 @@ describe('parseEnvironment', () => {
         HOST: '0.0.0.0',
         PORT: '8080',
         DATABASE_URL: TEST_DATABASE_URL,
+        FRONTEND_ORIGIN: 'https://edutrack.example.test',
       }),
     ).toEqual({
       NODE_ENV: 'production',
       HOST: '0.0.0.0',
       PORT: 8080,
       DATABASE_URL: TEST_DATABASE_URL,
+      FRONTEND_ORIGIN: 'https://edutrack.example.test',
     });
   });
 
@@ -57,5 +60,11 @@ describe('parseEnvironment', () => {
     expect(() => parseEnvironment({})).toThrow(
       /Invalid backend environment configuration:.*DATABASE_URL/s,
     );
+  });
+
+  it('requires an explicit trusted frontend origin in production', () => {
+    expect(() =>
+      parseEnvironment({ NODE_ENV: 'production', DATABASE_URL: TEST_DATABASE_URL }),
+    ).toThrow(/Invalid backend environment configuration:.*FRONTEND_ORIGIN/s);
   });
 });
