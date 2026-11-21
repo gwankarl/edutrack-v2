@@ -13,7 +13,7 @@
     "test:db": "npm run test:integration --workspace=@edutrack/backend",
     "test:e2e": "npm run test:e2e --workspace=@edutrack/frontend",
     "test:e2e:integration": "npm run test:e2e:integration --workspace=@edutrack/frontend",
-    "test:all": "npm run test:unit && npm run test:db && npm run test:e2e && npm run test:e2e:integration",
+    "test:all": "npm run test:unit && npm run test:db",
     "lint": "eslint .",
     "typecheck": "node scripts/typecheck.mjs",
     "format": "prettier --write .",

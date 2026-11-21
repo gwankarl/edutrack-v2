@@ -35,7 +35,10 @@ function requireTestDatabaseUrl(): URL {
     const isPostgres = /^postgres(?:ql)?:$/i.test(testUrl.protocol);
     const databaseName = decodeURIComponent(testUrl.pathname.replace(/^\/+/, ''));
 
-    if (!isPostgres || databaseName !== TEST_DATABASE_NAME) {
+    const hostname = testUrl.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+    const isLoopbackHost = ['localhost', '127.0.0.1', '::1'].includes(hostname);
+
+    if (!isPostgres || databaseName !== TEST_DATABASE_NAME || !isLoopbackHost) {
       throw new Error('Invalid test database target.');
     }
 
