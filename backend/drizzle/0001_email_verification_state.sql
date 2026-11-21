@@ -1,0 +1,2 @@
+ALTER TABLE "users" ADD COLUMN "email_verified_at" timestamp with time zone;--> statement-breakpoint
+CREATE INDEX "email_verification_tokens_user_created_at_idx" ON "email_verification_tokens" USING btree ("user_id","created_at");

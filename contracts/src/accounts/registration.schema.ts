@@ -6,12 +6,13 @@ import {
   accountEmailSchema,
   publicAccountSchema,
 } from './public-account.schema.js';
+import { newPasswordSchema } from './password.schema.js';
 
 export const registrationRequestSchema = z
   .object({
     displayName: accountDisplayNameSchema,
     email: accountEmailSchema,
-    password: z.string().min(12).max(128),
+    password: newPasswordSchema,
   })
   .strict();
 

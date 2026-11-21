@@ -14,6 +14,8 @@ export type SessionRecord = Pick<
   'id' | 'userId' | 'createdAt' | 'expiresAt' | 'revokedAt'
 >;
 
+type SessionUpdateExecutor = Pick<ReturnType<typeof getDatabaseClient>, 'update'>;
+
 // Keep the token hash internal to persistence and lookup operations.
 const sessionRecordColumns = {
   id: sessions.id,
@@ -82,8 +84,11 @@ export async function revokeSessionByTokenHash(tokenHash: SessionTokenHash): Pro
  * Marks every not-yet-revoked session for the user as revoked.
  * Returns the number of rows changed.
  */
-export async function revokeAllSessionsForUser(userId: Uuid): Promise<number> {
-  const revoked = await getDatabaseClient()
+export async function revokeAllSessionsForUser(
+  userId: Uuid,
+  executor: SessionUpdateExecutor = getDatabaseClient(),
+): Promise<number> {
+  const revoked = await executor
     .update(sessions)
     .set({ revokedAt: new Date() })
     .where(and(eq(sessions.userId, userId), isNull(sessions.revokedAt)))

@@ -109,11 +109,17 @@ describe('Accounts authentication routes', () => {
     expect(registrationResponseSchema.safeParse(response.json()).success).toBe(true);
     expect(response.json()).toEqual({ success: true, data: accountData });
     expect(response.headers['set-cookie']).toBeUndefined();
-    expect(mocks.registerStudent).toHaveBeenCalledWith({
-      displayName: 'Sample Student',
-      email: 'student@example.test',
-      password: 'a sufficiently long password',
-    });
+    expect(mocks.registerStudent).toHaveBeenCalledWith(
+      {
+        displayName: 'Sample Student',
+        email: 'student@example.test',
+        password: 'a sufficiently long password',
+      },
+      expect.objectContaining({
+        assertDeliveryAvailable: expect.any(Function),
+        sendForAccount: expect.any(Function),
+      }),
+    );
     expect(JSON.stringify(response.json())).not.toContain('passwordHash');
   });
 

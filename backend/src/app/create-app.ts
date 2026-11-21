@@ -10,7 +10,7 @@ export function createApp(environment: BackendEnvironment) {
 
   registerErrorHandlers(app);
 
-  registerPlugins(app);
+  registerPlugins(app, environment);
 
   registerRoutes(app, environment);
 

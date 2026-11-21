@@ -329,6 +329,7 @@ describe('Accounts PostgreSQL schemas', () => {
         'email_verification_tokens_pkey',
         'email_verification_tokens_token_hash_unique',
         'email_verification_tokens_expires_at_idx',
+        'email_verification_tokens_user_created_at_idx',
         'email_verification_tokens_user_unconsumed_idx',
         'password_reset_tokens_pkey',
         'password_reset_tokens_token_hash_unique',

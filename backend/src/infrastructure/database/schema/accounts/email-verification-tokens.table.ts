@@ -25,6 +25,7 @@ export const emailVerificationTokens = pgTable(
     ),
     uniqueIndex('email_verification_tokens_token_hash_unique').on(table.tokenHash),
     index('email_verification_tokens_expires_at_idx').on(table.expiresAt),
+    index('email_verification_tokens_user_created_at_idx').on(table.userId, table.createdAt),
     index('email_verification_tokens_user_unconsumed_idx')
       .on(table.userId)
       .where(sql`${table.consumedAt} IS NULL`),

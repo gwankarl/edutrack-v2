@@ -2,11 +2,12 @@ import { z } from 'zod';
 import { createSuccessResponseSchema } from '../common/api-response.schema.js';
 import type { ApiResponse } from '../common/api-response.schema.js';
 import { accountEmailSchema, publicAccountSchema } from './public-account.schema.js';
+import { currentPasswordSchema } from './password.schema.js';
 
 export const loginRequestSchema = z
   .object({
     email: accountEmailSchema,
-    password: z.string().min(1).max(128),
+    password: currentPasswordSchema,
   })
   .strict();
 

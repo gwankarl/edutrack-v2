@@ -4,3 +4,17 @@ export class AccountEmailAlreadyExistsError extends Error {
     this.name = 'AccountEmailAlreadyExistsError';
   }
 }
+
+export class EmailVerificationIssuanceLimitError extends Error {
+  constructor() {
+    super('Email verification issuance limit reached.');
+    this.name = 'EmailVerificationIssuanceLimitError';
+  }
+}
+
+export class PasswordResetIssuanceLimitError extends Error {
+  constructor() {
+    super('Password reset issuance limit reached.');
+    this.name = 'PasswordResetIssuanceLimitError';
+  }
+}

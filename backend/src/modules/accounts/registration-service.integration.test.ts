@@ -31,6 +31,11 @@ const testEmails: string[] = [];
 
 let pool: Pool | undefined;
 
+const testVerificationDelivery = {
+  assertDeliveryAvailable() {},
+  async sendForAccount() {},
+};
+
 function requirePool(): Pool {
   if (!pool) {
     throw new Error('Registration integration test pool was not initialized.');
@@ -142,7 +147,7 @@ afterAll(async () => {
 describe('Student registration service', () => {
   it('hashes the password, assigns only Student, and returns safe response data', async () => {
     const input = makeRegistration();
-    const response = await registerStudent(input);
+    const response = await registerStudent(input, testVerificationDelivery);
 
     expect(response).toMatchObject({
       success: true,
@@ -170,9 +175,9 @@ describe('Student registration service', () => {
 
   it('maps a duplicate email to the standard conflict application error', async () => {
     const input = makeRegistration();
-    await registerStudent(input);
+    await registerStudent(input, testVerificationDelivery);
 
-    await expect(registerStudent(input)).rejects.toMatchObject({
+    await expect(registerStudent(input, testVerificationDelivery)).rejects.toMatchObject({
       name: 'AppError',
       code: ERROR_CODES.CONFLICT,
       statusCode: 409,
@@ -184,7 +189,10 @@ describe('Student registration service', () => {
     const first = makeRegistration();
     const second = { ...first };
 
-    const results = await Promise.allSettled([registerStudent(first), registerStudent(second)]);
+    const results = await Promise.allSettled([
+      registerStudent(first, testVerificationDelivery),
+      registerStudent(second, testVerificationDelivery),
+    ]);
 
     const fulfilled = results.filter(
       (result): result is PromiseFulfilledResult<RegistrationResponse> =>
@@ -211,7 +219,10 @@ describe('Student registration service', () => {
       const input = makeRegistration();
       const inputWithRole = { ...input, role } as RegistrationRequest;
 
-      await expect(registerStudent(inputWithRole)).rejects.toHaveProperty('name', 'ZodError');
+      await expect(registerStudent(inputWithRole, testVerificationDelivery)).rejects.toHaveProperty(
+        'name',
+        'ZodError',
+      );
       await expect(findAccountForAuthenticationByEmail(input.email)).resolves.toBeUndefined();
     },
   );
@@ -223,7 +234,9 @@ describe('Student registration service', () => {
       new Error('Synthetic role assignment failure.'),
     );
 
-    await expect(registerStudent(input)).rejects.toThrow('Synthetic role assignment failure.');
+    await expect(registerStudent(input, testVerificationDelivery)).rejects.toThrow(
+      'Synthetic role assignment failure.',
+    );
     await expect(findAccountForAuthenticationByEmail(input.email)).resolves.toBeUndefined();
   });
 });

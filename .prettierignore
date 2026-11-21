@@ -5,5 +5,6 @@
 **/coverage/
 **/.vite/
 **/*.tsbuildinfo
+backend/drizzle/meta/
 package-lock.json
 AGENTS.md

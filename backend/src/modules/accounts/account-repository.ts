@@ -14,6 +14,14 @@ export type CreateAccountInput = Pick<
 export type PublicAccountRecord = Pick<typeof users.$inferSelect, 'id' | 'displayName' | 'email'>;
 
 export type AuthenticationAccountRecord = typeof users.$inferSelect;
+export type AccountForVerificationRecord = Pick<
+  typeof users.$inferSelect,
+  'id' | 'displayName' | 'email' | 'emailVerifiedAt'
+>;
+export type AccountForPasswordResetRecord = Pick<
+  typeof users.$inferSelect,
+  'id' | 'displayName' | 'email'
+>;
 export type AccountWithRolesRecord = Pick<
   AuthenticationAccountRecord,
   'id' | 'displayName' | 'email'
@@ -140,6 +148,43 @@ export async function findAccountForAuthenticationByEmail(
 
   const [account] = await getDatabaseClient()
     .select()
+    .from(users)
+    .where(sql`lower(${users.email}) = ${normalizedEmail}`)
+    .limit(1);
+
+  return account;
+}
+
+/** Returns only the data required to deliver verification mail. */
+export async function findAccountForVerificationByEmail(
+  email: string,
+): Promise<AccountForVerificationRecord | undefined> {
+  const normalizedEmail = normalizeEmail(email);
+  const [account] = await getDatabaseClient()
+    .select({
+      id: users.id,
+      displayName: users.displayName,
+      email: users.email,
+      emailVerifiedAt: users.emailVerifiedAt,
+    })
+    .from(users)
+    .where(sql`lower(${users.email}) = ${normalizedEmail}`)
+    .limit(1);
+
+  return account;
+}
+
+/** Returns only the fields needed to deliver a password-reset message. */
+export async function findAccountForPasswordResetByEmail(
+  email: string,
+): Promise<AccountForPasswordResetRecord | undefined> {
+  const normalizedEmail = normalizeEmail(email);
+  const [account] = await getDatabaseClient()
+    .select({
+      id: users.id,
+      displayName: users.displayName,
+      email: users.email,
+    })
     .from(users)
     .where(sql`lower(${users.email}) = ${normalizedEmail}`)
     .limit(1);

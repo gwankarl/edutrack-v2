@@ -29,6 +29,10 @@ const account = {
   displayName: 'Sample Student',
   email: 'student@example.test',
 };
+const verificationDelivery = {
+  assertDeliveryAvailable: vi.fn(),
+  sendForAccount: vi.fn().mockResolvedValue(undefined),
+};
 
 describe('registration service', () => {
   let transactionHandle: object;
@@ -44,14 +48,19 @@ describe('registration service', () => {
     mocks.hashPassword.mockResolvedValue('$argon2id$synthetic-test-hash');
     mocks.createAccount.mockResolvedValue(account);
     mocks.assignStudentRole.mockResolvedValue(undefined);
+    verificationDelivery.assertDeliveryAvailable.mockReset();
+    verificationDelivery.sendForAccount.mockReset().mockResolvedValue(undefined);
   });
 
   it('normalizes input, hashes the password, creates the account, and assigns Student', async () => {
-    const response = await registerStudent({
-      displayName: '  Sample Student  ',
-      email: ' STUDENT@Example.test ',
-      password: 'a sufficiently long password',
-    });
+    const response = await registerStudent(
+      {
+        displayName: '  Sample Student  ',
+        email: ' STUDENT@Example.test ',
+        password: 'a sufficiently long password',
+      },
+      verificationDelivery,
+    );
 
     expect(mocks.hashPassword).toHaveBeenCalledWith('a sufficiently long password');
     expect(transaction).toHaveBeenCalledOnce();
@@ -64,6 +73,8 @@ describe('registration service', () => {
       transactionHandle,
     );
     expect(mocks.assignStudentRole).toHaveBeenCalledWith(account.id, transactionHandle);
+    expect(verificationDelivery.assertDeliveryAvailable).toHaveBeenCalledOnce();
+    expect(verificationDelivery.sendForAccount).toHaveBeenCalledWith(account);
     expect(response).toEqual({ success: true, data: account });
     expect(JSON.stringify(response)).not.toContain('$argon2id$');
     expect(JSON.stringify(response)).not.toContain('a sufficiently long password');
@@ -79,7 +90,10 @@ describe('registration service', () => {
         role,
       } as RegistrationRequest;
 
-      await expect(registerStudent(input)).rejects.toHaveProperty('name', 'ZodError');
+      await expect(registerStudent(input, verificationDelivery)).rejects.toHaveProperty(
+        'name',
+        'ZodError',
+      );
 
       expect(mocks.hashPassword).not.toHaveBeenCalled();
       expect(mocks.getDatabaseClient).not.toHaveBeenCalled();
@@ -93,11 +107,14 @@ describe('registration service', () => {
     mocks.createAccount.mockRejectedValue(new AccountEmailAlreadyExistsError());
 
     await expect(
-      registerStudent({
-        displayName: 'Sample Student',
-        email: 'student@example.test',
-        password: 'a sufficiently long password',
-      }),
+      registerStudent(
+        {
+          displayName: 'Sample Student',
+          email: 'student@example.test',
+          password: 'a sufficiently long password',
+        },
+        verificationDelivery,
+      ),
     ).rejects.toMatchObject({
       name: 'AppError',
       code: ERROR_CODES.CONFLICT,
@@ -109,26 +126,52 @@ describe('registration service', () => {
     mocks.hashPassword.mockRejectedValue(new Error('Password hashing failed.'));
 
     await expect(
-      registerStudent({
-        displayName: 'Sample Student',
-        email: 'student@example.test',
-        password: 'a sufficiently long password',
-      }),
+      registerStudent(
+        {
+          displayName: 'Sample Student',
+          email: 'student@example.test',
+          password: 'a sufficiently long password',
+        },
+        verificationDelivery,
+      ),
     ).rejects.toBeInstanceOf(Error);
 
     expect(mocks.getDatabaseClient).not.toHaveBeenCalled();
     expect(mocks.createAccount).not.toHaveBeenCalled();
   });
 
+  it('checks email delivery availability before hashing or creating an account', async () => {
+    verificationDelivery.assertDeliveryAvailable.mockImplementationOnce(() => {
+      throw new Error('Transactional email delivery failed.');
+    });
+
+    await expect(
+      registerStudent(
+        {
+          displayName: 'Sample Student',
+          email: 'student@example.test',
+          password: 'a sufficiently long password',
+        },
+        verificationDelivery,
+      ),
+    ).rejects.toThrow('Transactional email delivery failed.');
+
+    expect(mocks.hashPassword).not.toHaveBeenCalled();
+    expect(mocks.getDatabaseClient).not.toHaveBeenCalled();
+  });
+
   it('does not assign a role if account creation fails', async () => {
     mocks.createAccount.mockRejectedValue(new Error('Synthetic persistence failure.'));
 
     await expect(
-      registerStudent({
-        displayName: 'Sample Student',
-        email: 'student@example.test',
-        password: 'a sufficiently long password',
-      }),
+      registerStudent(
+        {
+          displayName: 'Sample Student',
+          email: 'student@example.test',
+          password: 'a sufficiently long password',
+        },
+        verificationDelivery,
+      ),
     ).rejects.toThrow('Synthetic persistence failure.');
 
     expect(mocks.assignStudentRole).not.toHaveBeenCalled();
@@ -138,11 +181,14 @@ describe('registration service', () => {
     mocks.assignStudentRole.mockRejectedValue(new Error('Synthetic role assignment failure.'));
 
     await expect(
-      registerStudent({
-        displayName: 'Sample Student',
-        email: 'student@example.test',
-        password: 'a sufficiently long password',
-      }),
+      registerStudent(
+        {
+          displayName: 'Sample Student',
+          email: 'student@example.test',
+          password: 'a sufficiently long password',
+        },
+        verificationDelivery,
+      ),
     ).rejects.toThrow('Synthetic role assignment failure.');
 
     expect(mocks.createAccount).toHaveBeenCalledOnce();

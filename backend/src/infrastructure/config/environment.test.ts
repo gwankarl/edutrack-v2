@@ -11,6 +11,8 @@ describe('parseEnvironment', () => {
       PORT: 3000,
       DATABASE_URL: TEST_DATABASE_URL,
       FRONTEND_ORIGIN: 'http://localhost:5173',
+      SMTP_SECURE: false,
+      SMTP_FROM_NAME: 'EduTrack',
     });
   });
 
@@ -22,6 +24,11 @@ describe('parseEnvironment', () => {
         PORT: '8080',
         DATABASE_URL: TEST_DATABASE_URL,
         FRONTEND_ORIGIN: 'https://edutrack.example.test',
+        SMTP_HOST: 'smtp.example.test',
+        SMTP_PORT: '587',
+        SMTP_USER: 'smtp-user',
+        SMTP_PASSWORD: 'smtp-password',
+        SMTP_FROM_EMAIL: 'noreply@example.test',
       }),
     ).toEqual({
       NODE_ENV: 'production',
@@ -29,6 +36,13 @@ describe('parseEnvironment', () => {
       PORT: 8080,
       DATABASE_URL: TEST_DATABASE_URL,
       FRONTEND_ORIGIN: 'https://edutrack.example.test',
+      SMTP_HOST: 'smtp.example.test',
+      SMTP_PORT: 587,
+      SMTP_USER: 'smtp-user',
+      SMTP_PASSWORD: 'smtp-password',
+      SMTP_FROM_EMAIL: 'noreply@example.test',
+      SMTP_SECURE: false,
+      SMTP_FROM_NAME: 'EduTrack',
     });
   });
 
@@ -66,5 +80,58 @@ describe('parseEnvironment', () => {
     expect(() =>
       parseEnvironment({ NODE_ENV: 'production', DATABASE_URL: TEST_DATABASE_URL }),
     ).toThrow(/Invalid backend environment configuration:.*FRONTEND_ORIGIN/s);
+  });
+
+  it('accepts a complete SMTP configuration and normalizes values', () => {
+    expect(
+      parseEnvironment({
+        DATABASE_URL: TEST_DATABASE_URL,
+        SMTP_HOST: ' sandbox.smtp.mailtrap.io ',
+        SMTP_PORT: '2525',
+        SMTP_SECURE: 'false',
+        SMTP_USER: 'sandbox-user',
+        SMTP_PASSWORD: 'sandbox-password',
+        SMTP_FROM_EMAIL: 'edutrack@example.test',
+        SMTP_FROM_NAME: 'EduTrack Sandbox',
+      }),
+    ).toMatchObject({
+      SMTP_HOST: 'sandbox.smtp.mailtrap.io',
+      SMTP_PORT: 2525,
+      SMTP_SECURE: false,
+      SMTP_USER: 'sandbox-user',
+      SMTP_FROM_EMAIL: 'edutrack@example.test',
+      SMTP_FROM_NAME: 'EduTrack Sandbox',
+    });
+  });
+
+  it('rejects incomplete SMTP configuration', () => {
+    expect(() =>
+      parseEnvironment({
+        DATABASE_URL: TEST_DATABASE_URL,
+        SMTP_HOST: 'sandbox.smtp.mailtrap.io',
+        SMTP_PASSWORD: 'test-only-placeholder',
+      }),
+    ).toThrow(/SMTP_PORT: is required when SMTP is configured/);
+  });
+
+  it.each([
+    'javascript:alert(1)',
+    'https://user:password@example.test',
+    'https://example.test/path',
+    'https://example.test/?redirect=elsewhere',
+  ])('rejects unsafe frontend origins (%s)', (origin) => {
+    expect(() =>
+      parseEnvironment({ DATABASE_URL: TEST_DATABASE_URL, FRONTEND_ORIGIN: origin }),
+    ).toThrow(/FRONTEND_ORIGIN/);
+  });
+
+  it('requires HTTPS for a production frontend origin', () => {
+    expect(() =>
+      parseEnvironment({
+        NODE_ENV: 'production',
+        DATABASE_URL: TEST_DATABASE_URL,
+        FRONTEND_ORIGIN: 'http://edutrack.example.test',
+      }),
+    ).toThrow(/FRONTEND_ORIGIN: must use HTTPS in production/);
   });
 });
