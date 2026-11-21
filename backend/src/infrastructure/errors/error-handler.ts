@@ -3,6 +3,7 @@ import {
   type ErrorResponse,
   type ValidationDetail,
 } from '@edutrack/contracts';
+import { ZodError } from 'zod';
 import type { FastifyError, FastifyInstance, FastifyReply } from 'fastify';
 import { AppError } from './app-error.js';
 import { ERROR_CODES, type ErrorCode } from './error-codes.js';
@@ -26,6 +27,14 @@ function sendError(
   });
 
   return reply.code(statusCode).send(payload);
+}
+
+function zodValidationDetails(error: ZodError): ValidationDetail[] {
+  return error.issues.map((issue) => ({
+    path: issue.path.map((segment) => (typeof segment === 'number' ? segment : String(segment))),
+    code: issue.code,
+    message: issue.message || 'Invalid request value.',
+  }));
 }
 
 function validationDetails(error: FastifyError): ValidationDetail[] {
@@ -80,6 +89,16 @@ export function registerErrorHandlers(app: FastifyInstance): void {
   app.setErrorHandler<FastifyError>((error, request, reply) => {
     if (error instanceof AppError) {
       return sendError(reply, error.statusCode, error.code, error.message, error.details);
+    }
+
+    if (error instanceof ZodError) {
+      return sendError(
+        reply,
+        400,
+        ERROR_CODES.VALIDATION_ERROR,
+        'Request validation failed.',
+        zodValidationDetails(error),
+      );
     }
 
     if (error.validation !== undefined) {
