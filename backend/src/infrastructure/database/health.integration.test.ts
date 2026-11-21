@@ -84,7 +84,7 @@ function requireIntegrationUrl(): URL {
   return integrationDatabaseUrl;
 }
 
-beforeAll(() => {
+beforeAll(async () => {
   integrationDatabaseUrl = requireTestDatabaseUrl();
 
   const environment = parseEnvironment({
@@ -93,6 +93,17 @@ beforeAll(() => {
   });
 
   integrationPool = initializeDatabaseConnection(environment);
+
+  const identity = await integrationPool.query<{ database_name: string }>(
+    'SELECT current_database() AS database_name',
+  );
+
+  if (identity.rows[0]?.database_name !== TEST_DATABASE_NAME) {
+    throw new Error(
+      'Refusing to run database integration tests: PostgreSQL did not report edutrack_test.',
+    );
+  }
+
   integrationPool.on('error', () => {
     // Query failures are asserted by the test; never print driver details.
   });
