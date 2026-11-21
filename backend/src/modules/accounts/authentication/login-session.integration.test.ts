@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { Pool } from 'pg';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -290,6 +290,52 @@ describe('Login session integration', () => {
     expect(response.body).not.toContain('passwordHash');
     expect(response.body).not.toContain('sessionId');
     expect(response.headers['set-cookie']).toBeUndefined();
+  });
+
+  it('applies a role revocation to the next request on the same active session', async () => {
+    const { id: userId } = await createLoginUser('integration role refresh passphrase');
+    await getDatabaseClient()
+      .insert(userRoles)
+      .values([
+        { userId, role: 'student' },
+        { userId, role: 'teacher' },
+      ]);
+
+    const token = generateSessionToken();
+    await getDatabaseClient()
+      .insert(sessions)
+      .values({
+        userId,
+        tokenHash: hashSessionToken(token),
+        expiresAt: new Date(Date.now() + SESSION_LIFETIME_MS),
+      });
+
+    const app = makeApp();
+    const request = () =>
+      app.inject({
+        method: 'GET',
+        url: '/api/v1/auth/me',
+        headers: { cookie: `${AUTH_SESSION_COOKIE_NAME}=${token}` },
+      });
+
+    const beforeRevocation = await request();
+    expect(beforeRevocation.statusCode).toBe(200);
+    expect(beforeRevocation.json().data.roles).toEqual(['student', 'teacher']);
+
+    await getDatabaseClient()
+      .delete(userRoles)
+      .where(and(eq(userRoles.userId, userId), eq(userRoles.role, 'teacher')));
+
+    const afterRevocation = await request();
+    expect(afterRevocation.statusCode).toBe(200);
+    expect(currentUserResponseSchema.safeParse(afterRevocation.json()).success).toBe(true);
+    expect(afterRevocation.json().data.roles).toEqual(['student']);
+
+    const [activeSession] = await getDatabaseClient()
+      .select({ revokedAt: sessions.revokedAt })
+      .from(sessions)
+      .where(eq(sessions.tokenHash, hashSessionToken(token)));
+    expect(activeSession?.revokedAt).toBeNull();
   });
 
   it('returns the same unauthorized contract for expired and revoked sessions', async () => {

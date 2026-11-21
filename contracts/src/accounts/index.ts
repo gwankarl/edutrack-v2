@@ -65,3 +65,6 @@ export {
 } from './password-change.schema.js';
 
 export type { ChangePasswordRequest, ChangePasswordResponse } from './password-change.schema.js';
+
+export { updateProfileRequestSchema } from './profile-update.schema.js';
+export type { UpdateProfileRequest } from './profile-update.schema.js';

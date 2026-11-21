@@ -13,6 +13,7 @@ import {
 } from './auth.controller.js';
 import { getCurrentUserController } from './current-user.controller.js';
 import { logoutController } from './logout.controller.js';
+import { updateProfileController } from '../profile/profile-controller.js';
 import type { createEmailVerificationWorkflow } from '../email-verification/email-verification-workflow-service.js';
 import type { createPasswordResetWorkflow } from '../password-management/password-reset-workflow-service.js';
 
@@ -24,6 +25,7 @@ type AuthRouteOptions = {
 
 export const authRoutes: FastifyPluginAsync<AuthRouteOptions> = async (app, options) => {
   const { environment, verificationWorkflow, passwordResetWorkflow } = options;
+
   app.post('/auth/register', (request, reply) =>
     registerAccountController(request, reply, verificationWorkflow),
   );
@@ -39,6 +41,14 @@ export const authRoutes: FastifyPluginAsync<AuthRouteOptions> = async (app, opti
   app.get('/auth/me', { preHandler: requireAuthentication }, getCurrentUserController);
 
   const trustedOrigin = requireTrustedOrigin(environment.FRONTEND_ORIGIN);
+
+  app.patch(
+    '/auth/me',
+    {
+      preHandler: [trustedOrigin, requireAuthentication],
+    },
+    updateProfileController,
+  );
 
   app.post(
     '/auth/email-verification/request',
