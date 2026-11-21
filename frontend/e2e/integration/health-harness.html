@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduTrack API integration harness</title>
+  </head>
+  <body>
+    <main>
+      <h1>Backend health integration harness</h1>
+      <output
+        id="health-result"
+        aria-label="Backend health result"
+        aria-live="polite"
+        data-state="loading"
+        role="status"
+      >
+        Checking backend health…
+      </output>
+    </main>
+    <script type="module" src="/e2e/integration/health-harness.ts"></script>
+  </body>
+</html>

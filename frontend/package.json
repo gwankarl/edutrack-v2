@@ -7,7 +7,9 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "dev": "vite",
     "build": "vite build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test --config=playwright.config.ts",
+    "test:e2e:integration": "playwright test --config=playwright.integration.config.ts"
   },
   "dependencies": {
     "@edutrack/contracts": "^0.1.0",
